@@ -19,57 +19,77 @@ train_csv_name = "train.csv"
 test_csv_name = "test.csv"
 ideal_csv_name = "ideal.csv"
 
-train_table_name ="TrainingData"
-ideal_table_name = "IdealFunctions"
-
 train_file_path = test_file_path = ideal_file_path = None
 
-# import the data from csv files. 
-# 1. find the files within the project folder by appending "csv_name" to the path 
-# 2. save csv file content with pd.read_csv and return it
+train_table_name = "TrainingData"
+ideal_table_name = "IdealFunctions"
+test_table_name = "TestingData"
+
+train_table = ideal_table = test_table = None
+
+
+
+# get the csv file paths. csv files are in the folder "input-data"
+# return the file path of given csv_name
 def getCSVFilePath(csv_name):
     proj_path = os.path.dirname(sys.argv[0])
     input_folder_path = "input-data"
     filePath = os.path.join(proj_path, input_folder_path, csv_name)
     return filePath
 
-def createTablesFromCSV():
-    engine = db.create_engine("mysql+pymysql://root:password@localhost/ui-sem1-python-assignment")
-    connection = engine.connect()
-    inspector = inspect(engine)
-    meta_data = db.MetaData()
-    meta_data.create_all(engine)
-
-    training_data_table = createTable(engine, meta_data, train_file_path, train_table_name)
-    ideal_data_table = createTable(engine, meta_data, ideal_file_path, ideal_table_name)
-
-    alterColumnName(engine, train_table_name,'x','X')
-    alterColumnName(engine, train_table_name,'y1','Y1(training func)')
-    alterColumnName(engine, train_table_name,'y2','Y2(training func)')
-    alterColumnName(engine, train_table_name,'y3','Y3(training func)')
-    alterColumnName(engine, train_table_name,'y4','Y4(training func)')
-
-def createTable(engine, meta_data, file_path, table_name):
+# create a pandas Data Frame for the given csv file
+# return the pandas Data Frame 
+def createPandasDF(file_path):
     with open(file_path, 'r') as file:
-        data_df = pd.read_csv(file, sep=',', encoding="UTF-8")
-        data_df.to_sql(table_name, con=engine, index=False, if_exists='replace')
-    table = db.Table(table_name, meta_data, autoload=True, autoload_with = engine)
+        pandas_df = pd.read_csv(file, sep=',', encoding="UTF-8")
+    return pandas_df 
+
+# use a given pandas Data Frame to create a sql table 
+# return the sql table 
+def createTablesFromDF(table_name, pandas_df, eng, meta_d):
+    pandas_df.to_sql(table_name, con=eng, index=False, if_exists='replace')
+    table = db.Table(table_name, meta_d, autoload=True, autoload_with = eng)
     return table
 
+# loop over a sql table and change the column headings 
+# e.g. from lowercase x to uppercase X and lowercase y to uppercase Y
+def alterColumnNames(engine, table_name, columns, x, x_new, y, y_new, y_label):
+    alterOneColumnName(engine, table_name, x, x_new)
+    i = 1
+    while i < columns: 
+       alterOneColumnName(engine, table_name, y + str(i), y_new + str(i) + y_label)
+       i+=1
 
-def alterColumnName(engine, table, name, name_new):
+# helper function for 'alterColumntNames' 
+# using alembic library to change the heading of a column 
+def alterOneColumnName(engine, table, name, name_new):
     # Create migration context
     mc = MigrationContext.configure(engine.connect())
     # Creation operations object
     ops = Operations(mc)
     ops.alter_column(table,column_name = name,new_column_name = name_new,existing_type = db.String(100))
 
+def main(): 
+    engine = db.create_engine("mysql+pymysql://root:password@localhost/ui-sem1-python-assignment")
+    connection = engine.connect()
+    meta_data = db.MetaData()
+    meta_data.create_all(engine)
+
+    train_file_path = getCSVFilePath(train_csv_name)
+    test_file_path = getCSVFilePath(test_csv_name)
+    ideal_file_path = getCSVFilePath(ideal_csv_name)
+
+    train_table_df = createPandasDF(train_file_path)
+    ideal_table_df = createPandasDF(ideal_file_path)
+    test_table_df = createPandasDF(test_file_path)
+
+    train_table = createTablesFromDF(train_table_name, train_table_df, engine, meta_data)
+    ideal_table = createTablesFromDF(ideal_table_name, ideal_table_df, engine, meta_data)
+    test_table = createTablesFromDF(test_table_name, test_table_df, engine, meta_data)
+
+    alterColumnNames(engine, train_table_name, train_table_df.shape[1], 'x','X','y','Y', ' (training func)')
+    alterColumnNames(engine, ideal_table_name, ideal_table_df.shape[1], 'x','X','y','Y', ' (ideal func)')
 
 
-train_file_path = getCSVFilePath(train_csv_name)
-test_file_path = getCSVFilePath(test_csv_name)
-ideal_file_path = getCSVFilePath(ideal_csv_name)
-
-createTablesFromCSV()
-
-
+if __name__ == '__main__':
+    main()
