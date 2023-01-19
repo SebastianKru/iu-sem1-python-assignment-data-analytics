@@ -35,39 +35,61 @@ class BaseFunction(object):
         self.y_values = y
 
 
+class IdealFunction(BaseFunction):
+    #max_delta = None
+    column = None
+    def __init__(self, x, y, name):
+        super().__init__(x, y)
+        self.name = name
 
 
 class TrainingFunction(BaseFunction): 
     name = ""
     ideal_function = None
-    mse = None
-    max_delta = None  
+    mse = 9999999
+    max_delta = 0  
     length = None
+    matching_ideal_f = None
 
     def __init__(self, x, y, name):
         super().__init__(x, y)
         self.name = name
         self.length = len(self.x_values)
 
-class IdealFunction(BaseFunction):
-
-    max_delta = None
-    column_y_function = None
-
-    def __init__(self, x, y):
-        super().__init__(x, y)
-
 
 class TestFunction(BaseFunction): 
-    
     delta = [0,0,0,0]
 
     def __init__(self, x, y, matching_function):
         super().__init__(x, y)
         self.matching_function = matching_function
-        #self.length = len(self.x_values)
 
-def calculateSmallestMSE(tf, ideal_array):
+def calculateSmallestMSE(trainf, idealf):
+
+    for ideal in idealf:
+        squared_error = row = 0
+        for value in range(0, trainf.length): 
+            squared_error += (trainf.y_values[row] - ideal.y_values[row]) ** 2
+            row += 1
+        
+        mse = squared_error / trainf.length
+        if(mse < trainf.mse): 
+            trainf.mse = mse
+            trainf.matching_ideal_f = ideal
+
+    #ideal function, loop through rows to find biggest deviation 
+    row = 0
+    for value in range(0, trainf.length): 
+        delta = (trainf.y_values[row] - trainf.matching_ideal_f.y_values[row])
+        if delta > trainf.max_delta:
+            trainf.max_delta = delta
+        row += 1
+
+    print ('the smallest MSE for training function', trainf.name, ' is: ', 
+    trainf.mse, ' in ideal function: ', trainf.matching_ideal_f.name)
+    print('the biggest delta is: ', trainf.max_delta)
+
+def calculateSmallestMSE2(tf, ideal_array):
     columns_ideal_array = len(ideal_array) 
     col = 1
     mse_array = []
@@ -87,18 +109,22 @@ def calculateSmallestMSE(tf, ideal_array):
         if mse_array[i] < tf.mse:
             tf.mse = mse_array[i]
             tf.ideal_function = i
+            #tf.matching_ideal_f.column = i
 
     #ideal function, loop through rows to find biggest deviation 
     deltas = []
     row = 0
     for value in range(0, tf.length): 
-       deltas.append(tf.y_values[row] - ideal_array[tf.ideal_function ][row])
-       row += 1
+        tf.matching_ideal_f = IdealFunction(ideal_array[0], ideal_array[tf.ideal_function]) 
+        deltas.append(tf.y_values[row] - ideal_array[tf.ideal_function ][row])
+        print(tf.matching_ideal_f.x_values[row], " ", tf.matching_ideal_f.y_values[row])
+        row += 1
     
     tf.max_delta = deltas[0]
     for i in range(0, len(deltas)):
         if deltas[i] > tf.max_delta: 
             tf.max_delta = deltas[i]
+            tf.matching_ideal_f.max_delta = deltas[i]
 
     print ('the smallest MSE for training function', tf.name, ' is: ', 
     tf.mse, ' in ideal function: ', tf.ideal_function)
@@ -139,22 +165,24 @@ def main():
 
     training_functions = []
     i = 1
-
     while i < len(train_table_df.axes[1]):
         training_functions.append(TrainingFunction(train_array[0], train_array[i], "Training Function {}".format(i)))
         i += 1
 
+    ideal_functions = []
+    i = 1
+    while i < len(ideal_table_df.axes[1]):
+        ideal_functions.append(TrainingFunction(ideal_array[0], ideal_array[i], "Y {}".format(i)))
+        i += 1
+
     for tf in training_functions: 
-        calculateSmallestMSE(tf, ideal_array)
-
-# abgleich deltatest < deltamax[1,2,3,4]
-
-
+        calculateSmallestMSE(tf, ideal_functions)
 
 
     #test_function = TestFunction(test_array[0], test_array[1])
-    i = 0
+
     test_values = []
+    i = 0
     while i < len(test_array[0]):
         test_values.append(TestFunction(test_array[0][i], test_array[1][i], None))
         i+= 1
