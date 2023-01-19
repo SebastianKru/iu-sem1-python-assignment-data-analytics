@@ -10,6 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text, column
 import CSV_SQLHelper
 import PandasHelper
+import math
 
 #Fehler abfangen: filePath does not exist 
 #Fehler abfangen: anzahl der zeilen != 40 
@@ -33,6 +34,9 @@ class BaseFunction(object):
         self.x_values = x
         self.y_values = y
 
+
+
+
 class TrainingFunction(BaseFunction): 
     name = ""
     ideal_function = None
@@ -45,8 +49,23 @@ class TrainingFunction(BaseFunction):
         self.name = name
         self.length = len(self.x_values)
 
+class IdealFunction(BaseFunction):
+
+    max_delta = None
+    column_y_function = None
+
+    def __init__(self, x, y):
+        super().__init__(x, y)
+
+
 class TestFunction(BaseFunction): 
-    pass
+    
+    delta = [0,0,0,0]
+
+    def __init__(self, x, y, matching_function):
+        super().__init__(x, y)
+        self.matching_function = matching_function
+        #self.length = len(self.x_values)
 
 def calculateSmallestMSE(tf, ideal_array):
     columns_ideal_array = len(ideal_array) 
@@ -98,6 +117,7 @@ def main():
     csv_sql_helper = CSV_SQLHelper.CSV_SQL_Helper()
     pd_helper = PandasHelper.PD_Helper()
 
+
     train_file_path = csv_sql_helper.getCSVFilePath(train_csv_name)
     test_file_path = csv_sql_helper.getCSVFilePath(test_csv_name)
     ideal_file_path = csv_sql_helper.getCSVFilePath(ideal_csv_name)
@@ -115,18 +135,66 @@ def main():
 
     train_array = csv_sql_helper.sqlToArray(session, train_table, len(train_table_df.axes[1]))
     ideal_array = csv_sql_helper.sqlToArray(session, ideal_table, len(ideal_table_df.axes[1]))
+    test_array = csv_sql_helper.sqlToArray(session, test_table, len(test_table_df.axes[1]))
 
-    tf1 = TrainingFunction(train_array[0], train_array[1], "Training Function 1")
-    tf2 = TrainingFunction(train_array[0], train_array[2], "Training Function 2")
-    tf3 = TrainingFunction(train_array[0], train_array[3], "Training Function 3")
-    tf4 = TrainingFunction(train_array[0], train_array[4], "Training Function 4")
+    training_functions = []
+    i = 1
 
-    calculateSmallestMSE(tf1, ideal_array)
-    calculateSmallestMSE(tf2, ideal_array)
-    calculateSmallestMSE(tf3, ideal_array)
-    calculateSmallestMSE(tf4, ideal_array)
+    while i < len(train_table_df.axes[1]):
+        training_functions.append(TrainingFunction(train_array[0], train_array[i], "Training Function {}".format(i)))
+        i += 1
+
+    for tf in training_functions: 
+        calculateSmallestMSE(tf, ideal_array)
+
+# abgleich deltatest < deltamax[1,2,3,4]
 
 
+
+
+    #test_function = TestFunction(test_array[0], test_array[1])
+    i = 0
+    test_values = []
+    while i < len(test_array[0]):
+        test_values.append(TestFunction(test_array[0][i], test_array[1][i], None))
+        i+= 1
+
+
+    index = 0    
+    while index < len(test_values):
+        smallestValue = 99999999999
+        # differenz zw test und train berechnen 
+
+
+        for trainfunc in training_functions:
+            matching_index = trainfunc.x_values.index(test_values[index].x_values)
+            test_values[index].delta[training_functions.index(trainfunc)] = (
+                abs(trainfunc.y_values[matching_index] - test_values[index].y_values))
+
+        # check if calculated deltas are smaller than the largest delta existing for the 4 functions 
+        # save the 4 results 
+
+        #for t in test_values[index].delta:
+            #print("the delta for test value x: ", test_values[index].x_values, "at index: ", index, " is ", t)
+        #print()
+        index += 1
+
+        #training_functions[0-4].x_values[test_values[index]]
+        #for trainfunc in training_functions:
+        #    if ((abs(test_values[index].y_values) < (float(trainfunc.max_delta)) * math.sqrt(2))
+        #    and (trainfunc.max_delta < smallestValue)): 
+        #        smallestValue = trainfunc.max_delta 
+        #        test_values[index].matching_function = trainfunc.ideal_function
+        #        #print(test_values[index].x_values, "y value  ", test_values[index].y_values, "smallest value: ", smallestValue, "matching function: ", trainfunc.ideal_function)
+        #index += 1
+
+   # for t in test_values:
+   #     print("best match for ", t.x_values , ", ", t.y_values, 
+   #     " is ", t.matching_function)
+
+
+ ##### make testfunction oly one value par of x and y and create a list with for x in test.x.len 
+ # base class x und y ### vererbung wertepaar # vererbung array of wertepaar 
 
 if __name__ == '__main__':
     main()
