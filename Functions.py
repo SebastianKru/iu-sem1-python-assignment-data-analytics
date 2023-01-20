@@ -86,36 +86,37 @@ class TestValue(BaseFunction):
         super().__init__(x, y)
 
 
-def createFunctions(length, table_array, function_type):
-    '''
-    creates an Object of Type function_type from a given 2 dim list
-            Parameters:
-                    length (int): the given training function list 
-                    table_array (two dimensional list): a table with values stored in a two dimensional array
-                    function_type: (Object): object of one type of the Function Objects
-            Returns: 
-                    returns a list of functions of Type function_type
-    '''
-    functions = []
-    i = 1
-    while i < length:
-        functions.append(function_type(table_array[0], table_array[i], "Y{}".format(i)))
-        i += 1
-    return functions
-
-def createTestValuePairs(length, table_array, function_type):
-    '''
+class F_Creator:
+    def createFunctions(length, table_array, function_type):
+        '''
         creates an Object of Type function_type from a given 2 dim list
-            Parameters:
-                    length (int): the given training function list 
-                    table_array (two dimensional list): a table with values stored in a two dimensional array
-                    function_type: (Object): object of one type of the Function Objects
-            Returns: 
-                    returns a list of value_pairs of Type function_type
-    '''
-    value_pairs = []
-    i = 0
-    while i < length:
-        value_pairs.append(function_type(table_array[0][i], table_array[1][i]))
-        i+= 1
-    return value_pairs
+                Parameters:
+                        length (int): the given training function list 
+                        table_array (two dimensional list): a table with values stored in a two dimensional array
+                        function_type: (Object): object of one type of the Function Objects
+                Returns: 
+                        returns a list of functions of Type function_type
+        '''
+        functions = []
+        i = 1
+        while i < length:
+            functions.append(function_type(table_array[0], table_array[i], "Y{}".format(i)))
+            i += 1
+        return functions
+
+    def createTestValuePairs(length, table_array, function_type):
+        '''
+            creates an Object of Type function_type from a given 2 dim list
+                Parameters:
+                        length (int): the given training function list 
+                        table_array (two dimensional list): a table with values stored in a two dimensional array
+                        function_type: (Object): object of one type of the Function Objects
+                Returns: 
+                        returns a list of value_pairs of Type function_type
+        '''
+        value_pairs = []
+        i = 0
+        while i < length:
+            value_pairs.append(function_type(table_array[0][i], table_array[1][i]))
+            i+= 1
+        return value_pairs
