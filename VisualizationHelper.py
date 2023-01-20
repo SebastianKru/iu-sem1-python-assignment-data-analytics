@@ -21,13 +21,13 @@ def plotGraphs(trainf_list, testv_list):
         # drawing line plot for training values
         plot.line(tf.x_values, 
             tf.y_values, 
-            legend_label = "training function", 
+            legend_label = "training function {}".format(tf.name), 
             line_color="darkslateblue",
             line_width = 2)
         # drawing line plot for ideal values 
         plot.line(tf.matching_ideal_f.x_values, 
             tf.matching_ideal_f.y_values, 
-            legend_label = "ideal function", 
+            legend_label = "ideal function{}".format(tf.matching_ideal_f.name), 
             line_color="hotpink",
             line_width = 2)
         
