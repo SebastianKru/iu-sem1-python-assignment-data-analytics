@@ -2,6 +2,10 @@ import math
 
 
 class Calculations:
+    """
+    A class for assignment related calculations 
+    """
+
     def findSmallestMSEAndIdealFunction(trainf, idealf_list):
         '''
         Finds the smallest Mean Square Error for a given function(trainf) and a list of functions(idealf_list)

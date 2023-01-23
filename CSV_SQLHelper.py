@@ -1,11 +1,15 @@
 import os 
 import sqlalchemy as db 
 import sys 
+from CustomException import CustomParameterException
 
 
 class Table_Helper: 
+    """
+    A helper class for  CSV import and SQL related functions
+    """
 
-    def getCSVFilePath(csv_name):
+    def getCSVFilePath(self, csv_name):
         '''
         Gets a system file path for a given csv file name. Looks in the specified directory "input-data"
             Parameters:
@@ -15,10 +19,14 @@ class Table_Helper:
         '''
         proj_path = os.path.dirname(sys.argv[0])
         input_folder_path = "input-data"
-        filePath = os.path.join(proj_path, input_folder_path, csv_name)
-        return filePath
+        try: 
+            filePath = os.path.join(proj_path, input_folder_path, csv_name)
+        except: 
+            raise CustomParameterException(filePath, "File path wrong")
+        else:     
+            return filePath
 
-    def createTablesFromDF(table_name, pandas_df, eng, meta_d):
+    def createTablesFromDF(self, table_name, pandas_df, eng, meta_d):
         '''
         Gets a system file path for a given csv file name. Looks in the specified directory "input-data"
             Parameters:
@@ -33,7 +41,7 @@ class Table_Helper:
         table = db.Table(table_name, meta_d, autoload=True, autoload_with = eng)
         return table
 
-    def sqlToArray(session, table, nr_of_columns):
+    def sqlToArray(self, session, table, nr_of_columns):
         '''
         HelperFunction. Reads an SQL Table and transforms the Table into a 2 dimensional array. 
         I could have skipped this step and work with the Pandas DF instead, but I wanted to

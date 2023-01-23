@@ -1,3 +1,4 @@
+from CustomException import CustomTextException
 
 class BaseFunction(object): 
     """
@@ -10,10 +11,12 @@ class BaseFunction(object):
     y_values : float
         the y value
     """
+
+    number_of_data_entries = 400
+
     def __init__(self, x, y):
         self.x_values = x
         self.y_values = y
-
 
 class IdealFunction(BaseFunction):
     """
@@ -30,9 +33,13 @@ class IdealFunction(BaseFunction):
         the name of the ideal function
     """
     def __init__(self, x, y, name):
-        super().__init__(x, y)
-        self.name = name
-
+        if len(x) == len(y) == self.number_of_data_entries:
+            super().__init__(x, y)
+            self.name = name
+        else: 
+            raise CustomTextException(
+                "Number of rows is not {}.Check the csv files for correct data input"
+                .format(self.number_of_data_entries))
 
 class TrainingFunction(BaseFunction): 
     """
@@ -57,15 +64,20 @@ class TrainingFunction(BaseFunction):
         the matching functino as an object of IdealFunction
     """
 
-    mse = 9999999
+    mse = 9999
     max_delta = 0  
     # will be assigned with Object of Type IdealFunction
     matching_ideal_f = None
 
     def __init__(self, x, y, name):
-        super().__init__(x, y)
-        self.name = name
-        self.length = len(self.x_values)
+        if len(x) == len(y) == self.number_of_data_entries:
+            super().__init__(x, y)
+            self.name = name
+            self.length = len(self.x_values)
+        else: 
+            raise CustomTextException(
+                "Number of rows is not {}.Check the csv files for correct data input"
+                .format(self.number_of_data_entries))
 
 
 class TestValue(BaseFunction):

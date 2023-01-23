@@ -26,11 +26,13 @@ def main():
     Session = sessionmaker(bind = engine)
     session = Session()
 
+
+    table_helper = Table_Helper()
     # saving  file paths of the given csv files as string. 
     # csv files are located in the sub folder /input-data
-    train_file_path = Table_Helper.getCSVFilePath("train.csv")
-    test_file_path = Table_Helper.getCSVFilePath("test.csv")
-    ideal_file_path = Table_Helper.getCSVFilePath("ideal.csv")
+    train_file_path = table_helper.getCSVFilePath("train.csv")
+    test_file_path = table_helper.getCSVFilePath("test.csv")
+    ideal_file_path = table_helper.getCSVFilePath("ideal.csv")
 
     # creating a pandas dataframe from each of the given csv files
     train_table_df = PD_Helper.createPandasDF(train_file_path)
@@ -43,16 +45,16 @@ def main():
     PD_Helper.alterColumnNames(ideal_table_df, 'x','X','y','Y', ' (ideal func)')
 
     # creating sql tables for train, ideal and test dataframes 
-    train_table = Table_Helper.createTablesFromDF("TrainingData", train_table_df, engine, meta_data)
-    ideal_table = Table_Helper.createTablesFromDF("IdealFunctions", ideal_table_df, engine, meta_data)
-    test_table = Table_Helper.createTablesFromDF("TestingData", test_table_df, engine, meta_data)
+    train_table = table_helper.createTablesFromDF("TrainingData", train_table_df, engine, meta_data)
+    ideal_table = table_helper.createTablesFromDF("IdealFunctions", ideal_table_df, engine, meta_data)
+    test_table = table_helper.createTablesFromDF("TestingData", test_table_df, engine, meta_data)
 
     # loading all values from the sql tables train, ideal, test into seperate 2 dimensional arrays 
     # this step could be skipped as I could work with the pandas dataframes, but it was a good exercise 
     # to retrieve data from a sql db
-    train_array = Table_Helper.sqlToArray(session, train_table, len(train_table_df.axes[1]))
-    ideal_array = Table_Helper.sqlToArray(session, ideal_table, len(ideal_table_df.axes[1]))
-    test_array = Table_Helper.sqlToArray(session, test_table, len(test_table_df.axes[1]))
+    train_array = table_helper.sqlToArray(session, train_table, len(train_table_df.axes[1]))
+    ideal_array = table_helper.sqlToArray(session, ideal_table, len(ideal_table_df.axes[1]))
+    test_array = table_helper.sqlToArray(session, test_table, len(test_table_df.axes[1]))
 
     # creating objects of type TrainingFunction, IdealFunction and TestFunction
     training_functions = F_Creator.createFunctions(len(train_table_df.axes[1]), train_array, Functions.TrainingFunction)
@@ -72,7 +74,7 @@ def main():
     # creating a pandas dataframe based on the list test_vales of Type TestFunction
     test_df = PD_Helper.createTestDataFrame(test_values)
     # creating an SQL table based on the pandas dataframe test_df 
-    test_table = Table_Helper.createTablesFromDF('Test Data with Ideal Funcitons', test_df, engine, meta_data)
+    test_table = table_helper.createTablesFromDF('Test Data with Ideal Funcitons', test_df, engine, meta_data)
 
     # visualizing the functions with the help of bokeh library 
     Visualization.plotGraphs(training_functions, test_values)
