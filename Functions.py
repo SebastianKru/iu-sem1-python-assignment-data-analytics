@@ -12,7 +12,7 @@ class BaseFunction(object):
         the y value
     """
 
-    number_of_data_entries = 399
+    number_of_data_entries = 400
 
     def __init__(self, x, y):
         self.x_values = x
