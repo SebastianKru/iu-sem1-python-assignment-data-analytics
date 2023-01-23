@@ -37,7 +37,7 @@ class IdealFunction(BaseFunction):
             super().__init__(x, y)
             self.name = name
         else: 
-            raise CustomTextException(
+            raise Exception(
                 "Number of rows is not {}.Check the csv files for correct data input"
                 .format(self.number_of_data_entries))
 
