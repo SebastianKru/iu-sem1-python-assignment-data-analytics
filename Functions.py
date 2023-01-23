@@ -12,7 +12,7 @@ class BaseFunction(object):
         the y value
     """
 
-    number_of_data_entries = 400
+    number_of_data_entries = 399
 
     def __init__(self, x, y):
         self.x_values = x
@@ -37,7 +37,7 @@ class IdealFunction(BaseFunction):
             super().__init__(x, y)
             self.name = name
         else: 
-            raise CustomTextException(
+            raise Exception(
                 "Number of rows is not {}.Check the csv files for correct data input"
                 .format(self.number_of_data_entries))
 
