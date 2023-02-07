@@ -11,13 +11,7 @@ from Functions import F_Creator
 from CalculationsHelper import Calculations
 from VisualizationHelper import Visualization
 
-
-#Fehler abfangen: filePath does not exist 
-#Fehler abfangen: anzahl der zeilen != 40 
-#Objektorientierung. Klasse mit x und y wert anlegen und vererben zu klasse training data, test data und ideal data klasse 
-
 def main(): 
-
     # creating the engine for root user @ localhost 
     # and initialising all needed variables wo work with the SQL DB
     engine = db.create_engine("mysql+pymysql://root:password@localhost/ui-sem1-python-assignment")
@@ -79,8 +73,5 @@ def main():
     # visualizing the functions with the help of bokeh library 
     Visualization.plotGraphs(training_functions, test_values)
 
-    
-
 if __name__ == '__main__':
     main()
-

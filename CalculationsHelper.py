@@ -1,5 +1,6 @@
 import math
-
+from decimal import Decimal
+import ErrorFunctions
 
 class Calculations:
     """
@@ -15,23 +16,28 @@ class Calculations:
         '''
         # loop through given list of ideal functions
         for ideal in idealf_list:
-            squared_error = 0
             row = 0
-            # loop through all y values of the training function
-            for value in range(0, trainf.length): 
-                # calculate the squared error between y of train and y of ideal
-                squared_error += (trainf.y_values[row] - ideal.y_values[row]) ** 2
-                row += 1
-            
             # mean squared error = squared error / amount of data records
-            mse = squared_error / trainf.length
+            error = ErrorFunctions.calculateMSE(trainf.y_values, ideal.y_values, row)
+
+            #other error functions were called from here, but commented out due to the original assignment 
+            #error = ErrorFunctions.calculateRMSE(trainf.y_values, ideal.y_values, row)
+            #error = ErrorFunctions.calculateMAE(trainf.y_values, ideal.y_values, row)
+            #error = ErrorFunctions.calculateMAPE(trainf.y_values, ideal.y_values, row)
+            #error = ErrorFunctions.calculateSMAPE(trainf.y_values,ideal.y_values,row)
+            #error = ErrorFunctions.calculateRSquared(trainf.y_values, ideal.y_values, row)
+            
             # if mse smaller than current trainf.mse, replace it with the smaller value 
-            if(mse < trainf.mse): 
-                trainf.mse = mse
+            if(error < trainf.mse): 
+                trainf.mse = error
                 # saving the ideal function, as the smallest mse also reveals the best fitting ideal function
                 trainf.matching_ideal_f = ideal
             
-        print ('the smallest MSE for training function', trainf.name, ' is: ', trainf.mse, ' in ideal function: ', trainf.matching_ideal_f.name)
+        print ('training function error for ', trainf.name, ' is: ', 
+        trainf.mse, ' ideal function: ', trainf.matching_ideal_f.name)
+
+
+
 
     def findMaxDelta(trainf):
         '''
@@ -49,7 +55,7 @@ class Calculations:
             if delta > trainf.max_delta:
                 trainf.max_delta = delta
             row += 1
-        print('the biggest delta in Training Function', trainf.name,  "is: ", trainf.max_delta)
+        print('biggest delta in Training Function', trainf.name,  "is: ", trainf.max_delta)
 
 
     def findIdealFunctionsForTestData(test_values, training_functions):

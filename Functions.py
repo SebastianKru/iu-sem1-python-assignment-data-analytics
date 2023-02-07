@@ -64,7 +64,7 @@ class TrainingFunction(BaseFunction):
         the matching functino as an object of IdealFunction
     """
 
-    mse = 9999
+    mse = 99999
     max_delta = 0  
     # will be assigned with Object of Type IdealFunction
     matching_ideal_f = None

@@ -17,7 +17,9 @@ class Visualization:
                         .format(tf.name, tf.matching_ideal_f.name ),
                         x_axis_label ="x",
                         y_axis_label = "y",
-                        plot_width=1450, plot_height=850)
+                        #plot_width=1450, plot_height=850)
+                        plot_width=700 , plot_height=500)
+
 
             # drawing line plot for training values
             plot.line(tf.x_values, 
@@ -44,3 +46,4 @@ class Visualization:
             # drawing dots for the matching test values
             plot.circle(test_x, test_y, size = 7, color = "orangered", legend_label = "matched test values")
             show(plot)
+   
